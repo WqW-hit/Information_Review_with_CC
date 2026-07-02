@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lecture 16: 强典型序列与率失真定理直接证明</title>
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+<style>
+/* === ExamPass Shared Styles === */
+/* Paper-like warm background, clean typography, responsive */
+
+:root {
+  --paper: #fdf6e3;
+  --paper-dark: #f5ecd7;
+  --ink: #2c2c2c;
+  --ink-light: #555;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --divider: #d6c8a8;
+  --card-bg: #fef9ef;
+  --card-border: #e8dcc8;
+  --correct: #22c55e;
+  --correct-bg: #f0fdf4;
+  --wrong: #ef4444;
+  --wrong-bg: #fef2f2;
+  --tag-bg: #fef3c7;
+  --tag-text: #92400e;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "SimSun", sans-serif;
+  font-size: 12pt; line-height: 1.75; color: var(--ink);
+  max-width: 860px; margin: auto; padding: 24px 20px 60px;
+  background: var(--paper);
+}
+
+@media print {
+  body { font-size: 10.5pt; background: #fff; }
+  .no-print { display: none !important; }
+  h1, h2, h3 { page-break-after: avoid; }
+}
+
+/* ── Header ── */
+#exampass-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 6px 0; margin-bottom: 0;
+}
+.header-brand { font-size: 1.2em; font-weight: 700; color: #1a1a2e; letter-spacing: 0.3px; }
+.header-url  { font-size: 0.78em; color: #999; }
+.header-divider { border: none; border-top: 2px solid var(--divider); margin: 4px 0 20px 0; }
+
+/* ── Typography ── */
+h1 { font-size: 1.55em; text-align: center; border-bottom: 2px solid var(--divider); padding-bottom: 8px; margin-top: 0; }
+h2 { font-size: 1.25em; border-bottom: 1px solid var(--divider); padding-bottom: 4px; margin-top: 28px; }
+h3 { font-size: 1.08em; margin-top: 20px; color: var(--ink); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Tables ── */
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95em; }
+td, th { border: 1px solid var(--card-border); padding: 5px 9px; text-align: left; }
+th { background: var(--paper-dark); font-weight: 700; }
+
+/* ── Embedded source images ── */
+.embedded-images {
+  margin: 18px 0 24px;
+}
+.embedded-images-intro {
+  color: var(--ink-light);
+  font-size: 0.95em;
+}
+.embedded-image {
+  margin: 14px 0 18px;
+  padding: 10px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: var(--card-bg);
+  break-inside: avoid;
+}
+.embedded-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--divider);
+  background: #fff;
+}
+.embedded-image figcaption {
+  margin-top: 8px;
+  color: var(--ink-light);
+  font-size: 0.92em;
+  line-height: 1.5;
+}
+.embedded-image-note::before {
+  content: " - ";
+}
+
+/* ── Knowledge point vs explanation ── */
+.kp { font-weight: 700; color: var(--ink); }           /* key point: bold dark */
+.exp { font-weight: 400; color: var(--ink-light); }    /* explanation: lighter */
+.exp em, .exp strong { color: var(--ink); }             /* emphasis inside explanation */
+
+/* ── Block elements ── */
+blockquote {
+  border-left: 3px solid #c0392b; background: #fef9ef;
+  padding: 6px 14px; margin: 10px 0; font-size: 0.95em;
+}
+code { background: #f0ede0; padding: 2px 5px; border-radius: 3px; font-size: 0.92em; }
+pre { background: #f0ede0; padding: 10px; border-radius: var(--radius); overflow-x: auto; }
+
+/* ── TOC ── */
+div.toc {
+  background: var(--card-bg); padding: 14px 18px;
+  border: 1px solid var(--card-border); border-radius: var(--radius); margin-bottom: 22px;
+}
+div.toc ul { padding-left: 18px; }
+div.toc li { margin: 3px 0; font-size: 0.95em; }
+
+/* ── Priority tags ── */
+.tag-must   { background: #fee2e2; color: #991b1b; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-key    { background: #fef3c7; color: #92400e; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-freq   { background: #dbeafe; color: #1e40af; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+.tag-info   { background: #f0fdf4; color: #166534; padding: 1px 6px; border-radius: 3px; font-size: 0.82em; font-weight: 600; }
+
+/* === Interactive Test Styles === */
+
+/* ── Score box ── */
+#score-box {
+  display: none; background: var(--paper-dark); color: var(--ink);
+  padding: 16px 20px; border-radius: var(--radius); margin: 14px 0;
+  text-align: center; border: 1px solid var(--card-border);
+}
+#score-box .score-num { font-size: 2.2em; font-weight: 700; }
+#score-box .score-label { font-size: 0.85em; color: var(--ink-light); }
+
+/* ── Question card ── */
+.q-card {
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-radius: var(--radius); padding: 12px 14px; margin: 10px 0;
+  transition: all 0.15s;
+}
+.q-card.correct { border-left: 3px solid var(--correct); background: #f7fdf4; }
+.q-card.wrong   { border-left: 3px solid var(--wrong); background: #fef9f9; }
+
+.q-num  { font-weight: 700; font-size: 0.98em; margin-bottom: 4px; }
+.q-text { margin-bottom: 8px; font-size: 0.98em; }
+.q-text pre {
+  background: #f5f5f5; border: 1px solid #ddd; border-radius: 4px;
+  padding: 10px 14px; margin: 8px 0; overflow-x: auto;
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  line-height: 1.5; white-space: pre;
+}
+.q-text code {
+  font-family: 'Consolas', 'Courier New', monospace; font-size: 0.9em;
+  background: #f0f0f0; padding: 1px 4px; border-radius: 3px;
+}
+
+/* ── Options (compact) ── */
+.option {
+  display: block; padding: 4px 10px; margin: 3px 0;
+  border: 1px solid var(--card-border); border-radius: 4px;
+  cursor: pointer; transition: all 0.12s; font-size: 0.93em;
+  background: #fefcf5;
+}
+.option:hover            { background: #f0ede0; }
+.option input            { margin-right: 6px; }
+.option.selected         { border-color: var(--accent); background: #eff6ff; }
+.option.correct-answer   { border-color: var(--correct); background: var(--correct-bg); }
+.option.wrong-answer     { border-color: var(--wrong); background: var(--wrong-bg); }
+
+/* ── Textareas (compact) ── */
+.q-textarea {
+  width: 100%; min-height: 56px; border: 1px solid var(--card-border);
+  border-radius: 4px; padding: 6px 10px; font-family: inherit;
+  font-size: 0.93em; background: #fefcf5; resize: vertical;
+}
+.q-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── Result after grading ── */
+.result {
+  display: none; margin-top: 8px; padding: 8px 12px;
+  background: #fefcf5; border: 1px solid var(--card-border);
+  border-radius: 4px; font-size: 0.9em; line-height: 1.6;
+}
+.result .badge {
+  display: inline-block; padding: 1px 9px; border-radius: 3px;
+  font-weight: 700; font-size: 0.82em; margin-right: 6px;
+}
+.badge-ok  { background: var(--correct-bg); color: #166534; }
+.badge-no  { background: var(--wrong-bg); color: #991b1b; }
+.badge-ref { background: #dbeafe; color: #1e40af; }
+
+.result .explanation { margin-top: 4px; color: var(--ink); }
+.result .pitfall { color: #b45309; margin-top: 3px; font-size: 0.9em; }
+
+/* ── Grading button ── */
+.grading-bar { text-align: center; margin: 20px 0; }
+.grading-bar button {
+  font-size: 1em; padding: 8px 32px; background: var(--accent);
+  color: #fff; border: none; border-radius: var(--radius);
+  cursor: pointer; font-weight: 600; letter-spacing: 0.3px;
+}
+.grading-bar button:hover     { background: var(--accent-hover); }
+.grading-bar button:disabled  { background: #bbb; cursor: not-allowed; }
+
+/* ── Wrong-question review document ── */
+.wrong-review-box {
+  display: none;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin: 18px 0;
+}
+.wrong-review-box h3 {
+  margin-top: 0;
+}
+.wrong-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+.wrong-review-actions button {
+  font-size: 0.92em;
+  padding: 6px 12px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.wrong-review-actions button:hover {
+  background: #000;
+}
+#wrong-review-text {
+  width: 100%;
+  min-height: 220px;
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.84em;
+  line-height: 1.5;
+  background: #fff;
+  resize: vertical;
+}
+
+</style>
+</head>
+<body>
+
+<header id="exampass-header">
+  <div class="header-left"><span class="header-brand">ExamPass Assistant</span></div>
+  <div class="header-right"><span class="header-url">github.com/MIKUZ12/ExamPass-Assistant</span></div>
+</header>
+<hr class="header-divider">
+
+<h1>Lecture 16: 强典型序列与率失真定理直接证明</h1>
+<h2 style="text-align:center">章节测试</h2>
+<p style="text-align:center;color:var(--ink-light);font-size:0.95em">满分100分</p>
+
+<div id="score-box"><div class="score-num" id="score-num">0</div><div class="score-label">总分</div></div>
+<div id="questions-container"></div>
+<div class="grading-bar no-print"><button onclick="gradeAll()" id="grade-btn">提交批改</button></div>
+<div id="wrong-review-box" class="wrong-review-box no-print"></div>
+
+<script>
+var Q = [{"type": "choice", "points": 2, "question": "对典型序列 $x^n \\in T_\\delta(X)$，条件典型集 $T_\\delta(Y|x^n)$ 的大小约为？", "options": ["$2^{nH(Y)}$", "$2^{nH(Y|X)}$", "$2^{nI(X;Y)}$", "$2^{nH(X,Y)}$"], "answer": 1, "knowledge_point": "三类典型集的大小", "diagnosis_hint": "混淆条件熵与联合熵", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：条件典型集大小 $\\approx 2^{nH(Y|X)}$。$H(Y)$ 对应边缘典型集，$H(X,Y)$ 对应联合典型集，$I(X;Y)$ 对应的是概率 $2^{-nI(X;Y)}$，而非集合大小。", "pitfall": "对非典型 $x^n$ 此公式不成立"}, {"type": "choice", "points": 2, "question": "联合典型引理：若 $\\tilde{Y}_i \\overset{iid}{\\sim} Y$ 独立于 $x^n$，则 $\\Pr(\\tilde{Y}^n \\in T_\\delta(Y|x^n))$ 约为？", "options": ["$2^{-nH(Y|X)}$", "$2^{-nH(Y)}$", "$2^{-nI(X;Y)}$", "$1$"], "answer": 2, "knowledge_point": "联合典型引理", "diagnosis_hint": "混淆典型集大小与概率", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$\\Pr(\\tilde{Y}^n \\in T_\\delta(Y|x^n)) \\approx |T_\\delta(Y|x^n)|/|T_\\delta(Y)| = 2^{nH(Y|X)}/2^{nH(Y)} = 2^{-nI(X;Y)}$。注意这是指数小的概率，而不是1。", "pitfall": "与信道输出典型性（概率$\\approx 1$）混淆，关键区别：$\\tilde{Y}$ 与 $x^n$ 独立"}, {"type": "choice", "points": 2, "question": "Sanov 定理推论：$\\tilde{X}_i \\overset{iid}{\\sim} P_X$，$\\tilde{Y}_i \\overset{iid}{\\sim} P_Y$ 独立生成，则 $\\Pr((\\tilde{X}^n,\\tilde{Y}^n)\\in T_\\delta(X,Y))$ 约为？", "options": ["$2^{-nH(X,Y)}$", "$2^{nI(X;Y)}$", "$2^{-nI(X;Y)}$", "$2^{-nD(P_X\\|P_Y)}$"], "answer": 2, "knowledge_point": "Sanov 定理与联合典型性", "diagnosis_hint": "混淆 KL 散度的参数", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：$D(P_{XY}\\|P_X\\times P_Y) = I(X;Y)$，因此概率 $\\approx 2^{-nI(X;Y)}$。D 选项的 KL 参数都是边缘分布，不正确。", "pitfall": "KL 散度 $D(P_{XY}\\|P_X\\times P_Y)$ 的方向不可颠倒"}, {"type": "choice", "points": 2, "question": "有损压缩方案 $(n, M, \\text{Encoder}, \\text{Decoder})$ 中，压缩率 $R$ 的表达式是？", "options": ["$R = n/\\log_2 M$", "$R = \\log_2 M / n$", "$R = M/n$", "$R = 2^m / n$"], "answer": 1, "knowledge_point": "有损压缩方案定义", "diagnosis_hint": "分子分母颠倒", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：$M=2^m$ 个码字需要 $m=\\log_2 M$ 比特表示，对应 $n$ 个源符号，故每符号的压缩率 $R = \\log_2 M / n$ bits/source symbol。", "pitfall": "分子是 $\\log_2 M$（比特数），分母是 $n$（序列长度）"}, {"type": "choice", "points": 2, "question": "不失一般性（WLOG），最优编码器对给定码本 $c_n$ 的操作是？", "options": ["随机选择一个码字", "选择概率最大的码字", "选择与信源序列失真最小的码字", "选择熵最小的码字"], "answer": 2, "knowledge_point": "最近邻编码器最优性", "diagnosis_hint": "不理解WLOG的含义", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：对任意固定码本，最优编码策略是选择失真最小的码字（最近邻），即 $J = \\arg\\min_{j} d(U^n, v^n(j))$。任何其他策略只会增加失真。", "pitfall": "最优编码器是关于码本的确定性函数，无需额外优化"}, {"type": "choice", "points": 2, "question": "率失真定理直接部分的条件是？", "options": ["$R < I(U;V)$ 且 $E[d] \\leq D$", "$R > I(U;V)$ 且 $E[d] \\leq D$", "$R = I(U;V)$ 且 $E[d] = D$", "$R > H(U)$ 且 $E[d] \\leq D$"], "answer": 1, "knowledge_point": "率失真定理直接部分", "diagnosis_hint": "混淆 R 与 I(U;V) 的大小关系", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：直接部分要求 $R > I(U;V)$（码本足够大，能覆盖典型集）且 $(U,V)$ 满足 $E[d(U,V)] \\leq D$（可行对）。", "pitfall": "若 $R < I(U;V)$，码本太小，无法覆盖所有典型信源序列"}, {"type": "choice", "points": 2, "question": "直接证明中，若 $M = 2^{nR}$ 且 $R > I(U;V)$，则对典型 $u^n$ 存在联合典型码字的概率约为？", "options": ["$2^{-nI(U;V)}$", "$2^{nI(U;V)}$", "接近 0", "接近 1"], "answer": 3, "knowledge_point": "随机码本覆盖论证", "diagnosis_hint": "混淆单个码字的概率与整个码本的覆盖概率", "explanation": "<strong>正确答案</strong>：D<br><br><strong>推理过程</strong>：单个码字联合典型的概率约 $2^{-nI(U;V)}$，但有 $M=2^{nR}\\gg 2^{nI(U;V)}$ 个码字，因此至少一个联合典型的概率 $\\approx 1 - (1-2^{-nI})^M \\approx 1$。", "pitfall": "注意是码本整体的覆盖概率，不是单个码字的联合典型概率"}, {"type": "choice", "points": 2, "question": "直接证明最后一步，从随机码本的期望失真 $\\leq D$ 可以得出什么结论？", "options": ["所有码本期望失真 $\\leq D$", "存在某个确定性码本期望失真 $\\leq D$", "期望失真等于 $D$", "需要更多条件才能得出结论"], "answer": 1, "knowledge_point": "确定性码本提取", "diagnosis_hint": "不理解期望论证的含义", "explanation": "<strong>正确答案</strong>：B<br><br><strong>推理过程</strong>：若随机码本的期望（关于码本随机性）失真 $\\leq D$，则至少存在一个样本（确定性码本）其失真 $\\leq D$，否则期望也会 $> D$，矛盾。", "pitfall": "期望 $\\leq D$ 不意味着所有样本 $\\leq D$，只保证存在性"}, {"type": "choice", "points": 2, "question": "强典型性相比弱典型性的核心优势是什么？", "options": ["集合更大", "总概率更接近1", "经验均值控制任意函数的均值", "定义更简单"], "answer": 2, "knowledge_point": "强弱典型性比较", "diagnosis_hint": "不清楚弱典型性的局限", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：强典型性通过控制经验分布 $|\\hat{P}(a)-P(a)| < \\delta P(a)$，可以保证对任意函数 $g$，$(1/n)\\sum g(x_i) \\approx E[g(X)]$，特别适用于控制失真函数的经验均值。弱典型性仅控制 $(-1/n)\\log p(x^n) \\approx H(X)$。", "pitfall": "弱典型性只控制 $-\\log p$ 的经验均值，无法保证任意失真函数的经验均值"}, {"type": "choice", "points": 2, "question": "$R(D)$ 的定义是什么？", "options": ["$\\min_{E[d] \\leq D} H(U)$", "$\\min_{E[d] \\leq D} H(U|V)$", "$\\min_{E[d] \\leq D} I(U;V)$", "$\\max_{E[d] \\leq D} I(U;V)$"], "answer": 2, "knowledge_point": "率失真函数定义", "diagnosis_hint": "混淆最小化目标", "explanation": "<strong>正确答案</strong>：C<br><br><strong>推理过程</strong>：率失真函数 $R(D) = \\min_{E[d(U,V)] \\leq D} I(U;V)$，即在所有满足失真约束 $E[d] \\leq D$ 的联合分布 $P_{U,V}$ 上最小化互信息 $I(U;V)$。", "pitfall": "是最小化 $I(U;V)$ 而非最大化，且目标是互信息不是熵"}, {"type": "tf", "points": 1, "question": "对于 iid 生成的 $X^n$，由大数定律，$\\Pr(X^n \\in T_\\delta(X)) \\approx 1$。", "options": [], "answer": true, "knowledge_point": "边缘典型性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（$\\surd$）<br><br><strong>推理过程</strong>：由大数定律，iid 序列的经验分布依概率收敛到真实分布，因此 iid 序列几乎必然是典型的。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "条件典型集的大小约为 $2^{nH(Y|X)}$，对所有 $x^n$（无论典型与否）均成立。", "options": [], "answer": false, "knowledge_point": "条件典型集大小", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（$\\times$）<br><br><strong>推理过程</strong>：$|T_\\delta(Y|x^n)| \\approx 2^{nH(Y|X)}$ 仅对典型 $x^n \\in T_\\delta(X)$ 成立，对非典型序列此近似不适用。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "若 $\\tilde{Y}^n$ 由无记忆信道 $P_{Y|X}$ 根据典型 $x^n$ 生成（而非独立生成），则 $\\Pr(\\tilde{Y}^n \\in T_\\delta(Y|x^n)) \\approx 2^{-nI(X;Y)}$。", "options": [], "answer": false, "knowledge_point": "信道输出典型性 vs 联合典型引理", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（$\\times$）<br><br><strong>推理过程</strong>：若 $Y^n$ 由信道 $P_{Y|X}$ 根据典型 $x^n$ 生成，则 $\\Pr(Y^n \\in T_\\delta(Y|x^n)) \\approx 1$（信道输出典型性）。$\\approx 2^{-nI(X;Y)}$ 对应的是独立生成的 $\\tilde{Y}^n$（联合典型引理）。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "Sanov 定理给出 $\\Pr((\\tilde{X}^n,\\tilde{Y}^n)\\in T_\\delta(X,Y)) \\approx 2^{-nD(P_{XY}\\|P_X\\times P_Y)} = 2^{-nI(X;Y)}$，其中 $\\tilde{X}^n,\\tilde{Y}^n$ 独立生成。", "options": [], "answer": true, "knowledge_point": "Sanov 定理与联合典型性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（$\\surd$）<br><br><strong>推理过程</strong>：$D(P_{XY}\\|P_X\\times P_Y) = I(X;Y)$ 正是互信息的 KL 散度定义，因此两式相等。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "在有损压缩方案中，解码器与码本等价：指定解码器就是指定码本 $c_n = \\{v^n(1),\\ldots,v^n(M)\\}$。", "options": [], "answer": true, "knowledge_point": "解码器与码本等价性", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（$\\surd$）<br><br><strong>推理过程</strong>：解码器将索引 $j \\in \\{1,\\ldots,M\\}$ 映射到重构序列 $v^n(j)$，这完全由码本 $c_n$ 确定，两者等价。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "WLOG，对给定码本，最优编码器输出使失真最大的码字索引。", "options": [], "answer": false, "knowledge_point": "最近邻编码器", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（$\\times$）<br><br><strong>推理过程</strong>：最优编码器输出使失真最**小**的码字索引（最近邻），即 $\\arg\\min_j d(U^n, v^n(j))$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "直接证明中，若 $R > I(U;V)$，则对固定典型 $u^n$，随机码本中以高概率存在某码字与 $u^n$ 联合典型。", "options": [], "answer": true, "knowledge_point": "随机码本覆盖", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（$\\surd$）<br><br><strong>推理过程</strong>：每个码字联合典型概率 $\\approx 2^{-nI(U;V)}$，共有 $M=2^{nR} \\gg 2^{nI(U;V)}$ 个，故覆盖概率 $\\approx 1$。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "从随机码本期望失真 $\\leq D$ 可以推导出存在某确定性码本期望失真 $\\leq D$（概率论存在性论证）。", "options": [], "answer": true, "knowledge_point": "确定性码本提取", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：正确（$\\surd$）<br><br><strong>推理过程</strong>：若期望（关于码本随机性） $\\leq D$，则至少存在一个样本（确定性码本）使得失真 $\\leq D$，否则期望也将 $> D$，矛盾。", "pitfall": ""}, {"type": "tf", "points": 1, "question": "若随机码本大小恰好为 $M = 2^{nI(U;V)}$，则以高概率（趋于1）存在与 $u^n$ 联合典型的码字。", "options": [], "answer": false, "knowledge_point": "码本大小要求", "diagnosis_hint": "", "explanation": "<strong>正确答案</strong>：错误（$\\times$）<br><br><strong>推理过程</strong>：需要 $M \\gg 2^{nI(U;V)}$，即 $R > I(U;V)$ 才能以趋于1的概率覆盖。恰好等于时覆盖概率约为 $1 - e^{-1} \\approx 0.63$，不趋于1。", "pitfall": ""}, {"type": "short", "points": 6, "question": "简述强 $\\delta$-典型集的三种形式（边缘、联合、条件）及各自的集合大小。", "options": [], "answer": "", "knowledge_point": "三类典型集", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br>(1) 边缘典型集 $T_\\delta(X)$：$x^n$ 经验分布与 $P_X$ 接近，大小 $\\approx 2^{nH(X)}$。<br>(2) 联合典型集 $T_\\delta(X,Y)$：$(x^n,y^n)$ 联合经验分布与 $P_{XY}$ 接近，大小 $\\approx 2^{nH(X,Y)}$。<br>(3) 条件典型集 $T_\\delta(Y|x^n)$：给定典型 $x^n$，与之联合典型的 $y^n$，大小 $\\approx 2^{nH(Y|X)}$（仅对典型 $x^n$）。<br>$|T_\\delta(Y|x^n)|/|T_\\delta(Y)| \\approx 2^{-nI(X;Y)}$，恰好等于联合典型引理的概率。", "pitfall": ""}, {"type": "short", "points": 6, "question": "陈述联合典型引理，并与信道输出典型性比较，指出本质区别。", "options": [], "answer": "", "knowledge_point": "联合典型引理 vs 信道输出典型性", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>联合典型引理</strong>：$x^n\\in T_\\delta(X)$，$\\tilde{Y}_i\\overset{iid}{\\sim}Y$ 独立，则 $\\Pr(\\tilde{Y}^n\\in T_\\delta(Y|x^n))\\approx 2^{-nI(X;Y)}$（指数小）。<br><strong>信道输出典型性</strong>：$Y^n$ 由无记忆信道 $P_{Y|X}$ 根据典型 $x^n$ 生成，则 $\\Pr(Y^n\\in T_\\delta(Y|x^n))\\approx 1$。<br><strong>区别</strong>：关键在于 $\\tilde{Y}$ 是否与 $x^n$ 独立。独立生成时概率指数小；信道生成时（有依赖）概率趋于1。", "pitfall": ""}, {"type": "short", "points": 6, "question": "给出有损压缩方案 $(n,M,\\text{Encoder},\\text{Decoder})$ 的形式化定义，并解释为何 WLOG 可以假设编码器为最近邻编码器。", "options": [], "answer": "", "knowledge_point": "有损压缩方案", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>定义</strong>：(1) $n$：序列长度；(2) $M=2^m$：码本大小；(3) 编码器输出 $J=\\arg\\min_j d(U^n,v^n(j))\\in\\{1,\\ldots,M\\}$；(4) 解码器=码本 $c_n=\\{v^n(j)\\}$；(5) 压缩率 $R=\\log_2 M/n$；(6) 期望失真 $E[\\min_{v^n\\in c_n}d(U^n,v^n)]$。<br><strong>最近邻最优性</strong>：对固定码本，最近邻编码器使期望失真最小，任何其他编码器只会增加失真，因此 WLOG 分析时只需考虑码本质量即可。", "pitfall": ""}, {"type": "short", "points": 6, "question": "用 Sanov 定理和直接分解两种方法推导 $\\Pr((\\tilde{X}^n,\\tilde{Y}^n)\\in T_\\delta(X,Y))\\approx 2^{-nI(X;Y)}$（$\\tilde{X},\\tilde{Y}$ 独立生成）。", "options": [], "answer": "", "knowledge_point": "联合典型性两种推导", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>方法一（Sanov）</strong>：生成分布为乘积 $P_X\\times P_Y$，目标为 $P_{XY}$，由 Sanov/类型法：$\\Pr\\approx 2^{-nD(P_{XY}\\|P_X P_Y)}=2^{-nI(X;Y)}$（因 $D(P_{XY}\\|P_X P_Y)=I(X;Y)$）。<br><strong>方法二（分解）</strong>：$\\Pr((\\tilde{X}^n,\\tilde{Y}^n)\\in T_\\delta)\\approx\\Pr(\\tilde{X}^n\\in T_\\delta(X))\\cdot\\Pr(\\tilde{Y}^n\\in T_\\delta(Y|\\tilde{X}^n)|\\tilde{X}^n\\in T_\\delta(X))\\approx 1\\times 2^{-nI(X;Y)}$。两方法结论相同，互相印证。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "论述强典型性与弱典型性的区别与联系。具体地：(1) 分别给出两者的定义；(2) 比较两者在集合大小和总概率方面的性质；(3) 解释为什么率失真定理的正向证明需要用强典型性而非弱典型性。", "options": [], "answer": "", "knowledge_point": "强弱典型性比较", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>(1) 定义</strong>：<br>弱典型集 $A_\\epsilon^{(n)}$：$x^n$ 满足 $|-\\frac{1}{n}\\log p(x^n)-H(X)|\\leq\\epsilon$（即经验熵接近真实熵）。<br>强典型集 $T_\\delta(X)$：$x^n$ 满足 $\\forall a\\in\\mathcal{X}$，$|\\hat{P}(a)-P(a)|\\leq\\delta P(a)$（即每个符号的经验频率接近真实概率）。<br><strong>(2) 性质比较</strong>：两类典型集大小均 $\\approx 2^{nH(X)}$；总概率均趋于1；强典型集 $\\subseteq$ 弱典型集（取 $\\epsilon=\\delta H(X)$）。<br><strong>(3) 为何需要强典型性</strong>：弱典型性只控制 $-\\log p$ 的经验均值，无法保证任意函数 $d(u,v)$ 的经验均值接近 $E[d(U,V)]$。强典型性通过控制经验分布，可以保证 $(1/n)\\sum d(u_i,v_i)\\approx E[d(U,V)]$，这是失真约束的关键。", "pitfall": ""}, {"type": "essay", "points": 8, "question": "陈述率失真定理，并完整陈述其直接部分（正向）的证明思路，包括：随机码本构造、覆盖论证、失真控制和确定性码本提取四个步骤。", "options": [], "answer": "", "knowledge_point": "率失真定理直接证明", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>定理</strong>：$R(D)=\\min_{E[d(U,V)]\\leq D}I(U;V)$。<br><strong>直接部分等价表述</strong>：若 $E[d(U,V)]\\leq D$ 且 $R>I(U;V)$，则 $(R,D)$ 可达。<br><strong>步骤一（码本构造）</strong>：取 $M=2^{nR}$，生成随机码本 $C_n=\\{V^n(j)\\}$，各 $V^n(j)\\overset{iid}{\\sim}V$（按边缘分布独立生成）。<br><strong>步骤二（覆盖论证）</strong>：由联合典型引理，每个 $j$ 使 $(u^n,V^n(j))$ 联合典型的概率 $\\approx 2^{-nI(U;V)}$；$R>I(U;V)$ 保证 $M\\gg 2^{nI(U;V)}$，故以高概率存在某 $j^*$ 使联合典型。<br><strong>步骤三（失真控制）</strong>：$(u^n,V^n(j^*))\\in T_\\delta$ 由强典型性保证 $(1/n)\\sum d(u_i,v_i^*)\\approx E[d]\\leq D$；$U^n\\in T_\\delta(U)$ 概率 $\\approx 1$，故整体 $E[\\min_{v^n\\in C_n}d(U^n,v^n)]\\leq D$。<br><strong>步骤四（提取）</strong>：随机码本期望失真 $\\leq D$，故存在某确定性码本 $c_n$ 满足期望失真 $\\leq D$，即 $(R,D)$ 可达。", "pitfall": ""}, {"type": "essay", "points": 10, "question": "证明 $I(X;Y) = D(P_{XY} \\| P_X \\times P_Y)$，并以此解释 Sanov 定理为何给出 $\\Pr((\\tilde{X}^n,\\tilde{Y}^n)\\in T_\\delta(X,Y))\\approx 2^{-nI(X;Y)}$（$\\tilde{X},\\tilde{Y}$ 独立生成）。", "options": [], "answer": "", "knowledge_point": "互信息 KL 散度定义与 Sanov 定理", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>第一部分</strong>：$D(P_{XY}\\|P_X P_Y)=\\sum_{x,y}p(x,y)\\log\\frac{p(x,y)}{p(x)p(y)}=I(X;Y)$，这是互信息的 KL 散度定义，度量联合分布与独立性的偏离程度。<br><br><strong>第二部分</strong>：生成 $\\tilde{X}^n,\\tilde{Y}^n$ 时实际生成分布为 $Q=P_X\\times P_Y$（乘积分布）。事件 $(\\tilde{X}^n,\\tilde{Y}^n)\\in T_\\delta(X,Y)$ 要求联合经验分布接近目标分布 $P=P_{XY}$（真实联合分布）。类型法：$\\Pr(\\text{经验分布接近}P_{XY})\\approx 2^{-nD(P_{XY}\\|P_X\\times P_Y)}=2^{-nI(X;Y)}$。<br><strong>直觉</strong>：若 $X,Y$ 强依赖（$I$ 大），独立生成的序列看起来联合分布的概率极小；若 $X,Y$ 独立（$I=0$），独立生成的序列天然满足联合分布（概率为1数量级）。", "pitfall": ""}, {"type": "comprehensive", "points": 20, "question": "设 $U\\sim\\mathrm{Bernoulli}(1/2)$（等概二元信源），汉明失真 $d(u,\\hat{u})=\\mathbf{1}[u\\neq\\hat{u}]$，失真约束为 $D$（$0\\leq D\\leq 1/2$）。\\n(1) [4分] 计算率失真函数 $R^{(I)}(D)$。\\n(2) [4分] 指定满足 $E[d(U,V)]\\leq D$ 的最优试验信道 $P_{V|U}$，计算此时的 $I(U;V)$。\\n(3) [6分] 根据直接部分证明，描述如何构造码本并证明期望失真 $\\leq D$。\\n(4) [6分] 对一般信源，当 $M=2^{nR}$，$R>I(U;V)$ 时，计算随机码本中存在与典型 $u^n$ 联合典型码字的概率并证明其趋于1。", "options": [], "answer": "", "knowledge_point": "率失真理论综合应用", "diagnosis_hint": "", "explanation": "<strong>参考答案</strong>：<br><strong>(1)</strong> 最优试验信道为 BSC（交叉概率 $D$），$I(U;V)=1-H_b(D)$（$H_b$ 为二元熵函数）。故 $R^{(I)}(D)=\\max(1-H_b(D),0)$，当 $0\\leq D\\leq 1/2$ 时 $R(D)=1-H_b(D)$。<br><br><strong>(2)</strong> 最优试验信道 $P_{V|U}$：$P(\\hat{u}=u)=1-D$，$P(\\hat{u}\\neq u)=D$（BSC）。期望汉明失真 $E[d]=D$。互信息 $I(U;V)=H(U)-H(U|V)=1-H_b(D)$。<br><br><strong>(3)</strong> 构造：$M=2^{nR}$（$R>1-H_b(D)$），各 $V^n(j)\\overset{iid}{\\sim}\\mathrm{Ber}(1/2)$ 独立生成。最近邻编码器 $J=\\arg\\min_j d_H(u^n,V^n(j))$。由覆盖论证（$R>I$），存在 $j^*$ 使 $(u^n,V^n(j^*))\\in T_\\delta$；强典型性保证 $(1/n)d_H\\approx D$；$U^n\\in T_\\delta$ 概率 $\\approx 1$，故 $E[\\min_j d(U^n,V^n(j))]\\leq D+\\epsilon$；取期望的好码本即得。<br><br><strong>(4)</strong> 设 $p=\\Pr((u^n,V^n(j))\\in T_\\delta)\\approx 2^{-nI}$。无联合典型码字的概率为 $(1-p)^M\\approx(1-2^{-nI})^{2^{nR}}$。令 $f(n)=2^{n(R-I)}\\to\\infty$（因 $R>I$），则 $(1-2^{-nI})^{2^{nR}}=(1-2^{-nI})^{2^{nI}\\cdot f(n)}\\approx e^{-f(n)}\\to 0$。故存在联合典型码字的概率 $\\to 1$。", "pitfall": ""}];
+var LABELS = {"page_title": "章节测试", "section": {"choice": "一、选择题", "tf": "二、判断题", "short": "三、简答题", "essay": "四、问答题", "comprehensive": "五、综合题"}, "section_order": ["choice", "tf", "short", "essay", "comprehensive"], "points_suffix": "分", "true_label": "正确", "false_label": "错误", "placeholder": "在此作答...", "pitfall_prefix": "易错提醒：", "correct_label": "正确", "wrong_label": "错误", "answer_prefix": "正确答案：", "reference_label": "参考答案", "graded_label": "已批改", "grade_button": "提交批改", "unanswered_label": "未作答", "wrong_review_title": "错题分析文档", "wrong_review_intro": "本次收录 __COUNT__ 道客观题错题。可以下载 Markdown 文档，或复制整段内容交给模型做错因分析和二次学习规划。", "no_wrong_questions": "本次客观题没有错题。主观题请对照参考答案自行复盘。", "download_wrong_review": "下载错题文档", "copy_wrong_review_prompt": "复制错题分析 Prompt", "score_label": "总分", "duration_prefix": "满分 100 分 | 建议 ", "duration_suffix": " 分钟 | 选择答案后点击提交批改"};
+var WRONG_REVIEW_PROMPT = "";
+var LAST_WRONG_REVIEW = '';
+
+function pointsOf(q) {
+  return q.points || q.score || 0;
+}
+
+function stripHtml(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html || '';
+  return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+}
+
+// Convert Markdown fenced code blocks (```lang\n...\n```) and inline `code`
+// to <pre><code> / <code> HTML, then convert \n to <br> for plain text lines.
+function formatQuestion(text) {
+  if (!text) return '';
+  // 1. Replace fenced code blocks: ```lang\ncode\n```
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, function(_, lang, code) {
+    var escaped = code
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    var cls = lang ? ' class="language-' + lang + '"' : '';
+    return '<pre><code' + cls + '>' + escaped + '</code></pre>';
+  });
+  // 2. Replace inline backtick `code`
+  text = text.replace(/`([^`\n]+)`/g, function(_, code) {
+    var escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return '<code>' + escaped + '</code>';
+  });
+  // 3. Convert remaining \n to <br> (outside pre blocks already handled above)
+  // Split on <pre>...</pre> so we don't double-process code blocks
+  var parts = text.split(/(<pre>[\s\S]*?<\/pre>)/);
+  for (var i = 0; i < parts.length; i++) {
+    if (i % 2 === 0) {
+      parts[i] = parts[i].replace(/\n/g, '<br>');
+    }
+  }
+  return parts.join('');
+}
+
+function answerText(q, value) {
+  if (value === null || value === undefined || value === '') return LABELS.unanswered_label;
+  var idx = parseInt(value);
+  if (q.type === 'choice') {
+    return String.fromCharCode(65 + idx) + '. ' + ((q.options && q.options[idx]) ? stripHtml(q.options[idx]) : '');
+  }
+  if (q.type === 'tf') {
+    return idx === 0 ? LABELS.true_label : LABELS.false_label;
+  }
+  return String(value);
+}
+
+function normalizedAnswer(q) {
+  if (q.type === 'tf') {
+    if (q.answer === LABELS.true_label || q.answer === true || q.answer === 'true') return 0;
+    if (q.answer === LABELS.false_label || q.answer === false || q.answer === 'false') return 1;
+  }
+  return parseInt(q.answer);
+}
+
+function questionTypeLabel(type) {
+  return LABELS.section[type] || type;
+}
+
+function build(){
+  var container = document.getElementById('questions-container');
+  if (!container) { console.error('ExamPass: questions-container not found'); return; }
+  var h = '';
+  var sec = '';
+  var titles = LABELS.section;
+
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var s = q.type;
+    if (s !== sec) {
+      sec = s;
+      if (titles[s]) {
+        h += '<h3>' + titles[s] + '</h3>';
+      }
+    }
+
+    var qid = 'q' + i;
+    h += '<div class="q-card" id="card-' + qid + '">';
+    h += '<div class="q-num">' + (i+1) + '. (' + pointsOf(q) + ' ' + LABELS.points_suffix + ')</div>';
+    h += '<div class="q-text">' + formatQuestion(q.question) + '</div>';
+
+    if (q.type === 'choice') {
+      var opts = q.options || [];
+      for (var j = 0; j < opts.length; j++) {
+        h += '<label class="option" id="opt-' + qid + '-' + j + '" onclick="sel(\'' + qid + '\',' + j + ')">';
+        h += '<input type="radio" name="' + qid + '" value="' + j + '">' + String.fromCharCode(65+j) + '. ' + opts[j] + '</label>';
+      }
+    } else if (q.type === 'tf') {
+      h += '<label class="option" id="opt-' + qid + '-0" onclick="sel(\'' + qid + '\',0)">';
+      h += '<input type="radio" name="' + qid + '" value="0">' + LABELS.true_label + '</label>';
+      h += '<label class="option" id="opt-' + qid + '-1" onclick="sel(\'' + qid + '\',1)">';
+      h += '<input type="radio" name="' + qid + '" value="1">' + LABELS.false_label + '</label>';
+    } else {
+      h += '<textarea class="q-textarea" id="text-' + qid + '" placeholder="' + LABELS.placeholder + '" rows="3"></textarea>';
+    }
+
+    h += '<div class="result" id="result-' + qid + '">';
+    h += '<span class="badge" id="badge-' + qid + '"></span><span id="correct-' + qid + '"></span>';
+    h += '<div class="explanation">' + q.explanation + '</div>';
+    if (q.pitfall) {
+      h += '<div class="pitfall">' + LABELS.pitfall_prefix + q.pitfall + '</div>';
+    }
+    h += '</div></div>';
+  }
+
+  container.innerHTML = h;
+
+  // Re-render MathJax for dynamically inserted formulas
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([container]).catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', build);
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  build();
+}
+
+function sel(qid, idx) {
+  var prefix = 'opt-' + qid + '-';
+  var all = document.querySelectorAll('[id^="' + prefix + '"]');
+  for (var i = 0; i < all.length; i++) {
+    all[i].classList.remove('selected');
+  }
+  var target = document.getElementById('opt-' + qid + '-' + idx);
+  if (target) {
+    target.classList.add('selected');
+  }
+  var radio = document.querySelector('input[name="' + qid + '"][value="' + idx + '"]');
+  if (radio) {
+    radio.checked = true;
+  }
+}
+
+function gradeAll() {
+  var score = 0;
+  var wrongItems = [];
+  for (var i = 0; i < Q.length; i++) {
+    var q = Q[i];
+    var qid = 'q' + i;
+    var card = document.getElementById('card-' + qid);
+    var result = document.getElementById('result-' + qid);
+    var badge = document.getElementById('badge-' + qid);
+    var correctEl = document.getElementById('correct-' + qid);
+    if (!card || !result) continue;
+
+    result.style.display = 'block';
+
+    if (q.type === 'choice' || q.type === 'tf') {
+      var radio = document.querySelector('input[name="' + qid + '"]:checked');
+      var correctIndex = normalizedAnswer(q);
+      if (radio && parseInt(radio.value) === correctIndex) {
+        score += pointsOf(q);
+        card.classList.add('correct');
+        badge.className = 'badge badge-ok';
+        badge.textContent = LABELS.correct_label;
+        correctEl.innerHTML = '';
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+      } else {
+        card.classList.add('wrong');
+        badge.className = 'badge badge-no';
+        badge.textContent = LABELS.wrong_label;
+        var ansText = answerText(q, correctIndex);
+        correctEl.innerHTML = LABELS.answer_prefix + ansText;
+        if (radio) {
+          var wrongOpt = document.getElementById('opt-' + qid + '-' + radio.value);
+          if (wrongOpt) wrongOpt.classList.add('wrong-answer');
+        }
+        var correctOpt = document.getElementById('opt-' + qid + '-' + correctIndex);
+        if (correctOpt) correctOpt.classList.add('correct-answer');
+        wrongItems.push({
+          number: i + 1,
+          type: questionTypeLabel(q.type),
+          points: pointsOf(q),
+          question: stripHtml(q.question),
+          options: (q.options || []).map(stripHtml),
+          userAnswer: answerText(q, radio ? radio.value : null),
+          correctAnswer: ansText,
+          explanation: stripHtml(q.explanation),
+          pitfall: stripHtml(q.pitfall || ''),
+          knowledgePoint: stripHtml(q.knowledge_point || q.knowledgePoint || '')
+        });
+      }
+    } else {
+      card.classList.add('correct');
+      badge.className = 'badge badge-ref';
+      badge.textContent = LABELS.reference_label;
+    }
+  }
+
+  var sb = document.getElementById('score-box');
+  if (sb) {
+    sb.style.display = 'block';
+    document.getElementById('score-num').textContent = score;
+    sb.scrollIntoView({behavior:'smooth'});
+  }
+
+  var opts = document.querySelectorAll('.option');
+  for (var i = 0; i < opts.length; i++) opts[i].style.pointerEvents = 'none';
+  var tas = document.querySelectorAll('.q-textarea');
+  for (var i = 0; i < tas.length; i++) tas[i].disabled = true;
+
+  var btn = document.getElementById('grade-btn');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = LABELS.graded_label;
+  }
+
+  buildWrongReview(wrongItems);
+
+  // Re-render MathJax for revealed explanations
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.error('MathJax typeset error:', err);
+    });
+  }
+}
+
+function buildWrongReview(wrongItems) {
+  var box = document.getElementById('wrong-review-box');
+  if (!box) return;
+
+  LAST_WRONG_REVIEW = renderWrongReviewMarkdown(wrongItems);
+
+  if (!wrongItems.length) {
+    box.style.display = 'block';
+    box.innerHTML = '<h3>' + LABELS.wrong_review_title + '</h3><p>' + LABELS.no_wrong_questions + '</p>';
+    return;
+  }
+
+  box.style.display = 'block';
+  box.innerHTML = [
+    '<h3>' + LABELS.wrong_review_title + '</h3>',
+    '<p>' + LABELS.wrong_review_intro.replace('__COUNT__', wrongItems.length) + '</p>',
+    '<div class="wrong-review-actions">',
+    '<button type="button" onclick="downloadWrongReview()">' + LABELS.download_wrong_review + '</button>',
+    '<button type="button" onclick="copyWrongReviewPrompt()">' + LABELS.copy_wrong_review_prompt + '</button>',
+    '</div>',
+    '<textarea id="wrong-review-text" readonly rows="12">' + LAST_WRONG_REVIEW.replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea>'
+  ].join('');
+}
+
+function renderWrongReviewMarkdown(wrongItems) {
+  var now = new Date().toLocaleString();
+  var lines = [];
+
+  lines.push('# ExamPass 错题分析文档');
+  lines.push('');
+  lines.push('- 生成时间：' + now);
+  lines.push('- 错题数量：' + wrongItems.length);
+  lines.push('');
+  lines.push('## 给模型的错题分析 Prompt');
+  lines.push('');
+  if (WRONG_REVIEW_PROMPT) {
+    lines.push(WRONG_REVIEW_PROMPT);
+  } else {
+    lines.push('请根据下面的错题记录，分析我的错因，并给出继续学习方案。要求：');
+    lines.push('1. 按知识模块归类错题，不要只逐题复述答案；');
+    lines.push('2. 判断每道题错在概念定义、公式推导、图表理解、条件适用、计算步骤、概念混淆还是审题；');
+    lines.push('3. 对涉及公式或推导的错题，补全从前提到结论的推导链条，不能跳步；');
+    lines.push('4. 对选择题，解释我选错选项为什么有迷惑性，以及正确选项和错误选项的关键边界；');
+    lines.push('5. 给出需要回看课件的具体知识点、图表、公式和页/章节线索；');
+    lines.push('6. 最后生成一份二次学习清单和 5 道针对这些薄弱点的进阶训练题。');
+  }
+  lines.push('');
+  lines.push('## 错题记录');
+  lines.push('');
+
+  if (!wrongItems.length) {
+    lines.push('本次没有客观题错题。');
+    return lines.join('\n');
+  }
+
+  for (var i = 0; i < wrongItems.length; i++) {
+    var item = wrongItems[i];
+    lines.push('### 错题 ' + (i + 1) + '：第 ' + item.number + ' 题');
+    lines.push('');
+    lines.push('- 题型：' + item.type);
+    lines.push('- 分值：' + item.points);
+    lines.push('- 题干：' + item.question);
+    if (item.options.length) {
+      lines.push('- 选项：');
+      for (var j = 0; j < item.options.length; j++) {
+        lines.push('  - ' + String.fromCharCode(65 + j) + '. ' + item.options[j]);
+      }
+    }
+    lines.push('- 我的答案：' + item.userAnswer);
+    lines.push('- 正确答案：' + item.correctAnswer);
+    lines.push('- 解析：' + item.explanation);
+    if (item.pitfall) lines.push('- 易错点：' + item.pitfall);
+    if (item.knowledgePoint) lines.push('- 对应知识点：' + item.knowledgePoint);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+function downloadWrongReview() {
+  if (!LAST_WRONG_REVIEW) return;
+  var blob = new Blob([LAST_WRONG_REVIEW], {type: 'text/markdown;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = '错题分析文档.md';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyWrongReviewPrompt() {
+  var text = LAST_WRONG_REVIEW || '';
+  if (!text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text);
+  } else {
+    var ta = document.getElementById('wrong-review-text');
+    if (ta) {
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+    }
+  }
+}
+
+</script>
+</body>
+</html>
